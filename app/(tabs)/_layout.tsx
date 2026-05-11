@@ -9,6 +9,8 @@ const tabBar = components.tabBar;
 
 const TabLayout = () => {
   const insets = useSafeAreaInsets();
+  const tabBarBottom = Math.max(insets.bottom, tabBar.horizontalInset);
+  const tabBarTotalHeight = tabBar.height + tabBarBottom;
   const TabIcon = ({ focused, icon }: TabIconProps) => {
     return (
       <View className="tabs-icon">
@@ -24,9 +26,12 @@ const TabLayout = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
+          sceneStyle: {
+         paddingBottom: tabBarTotalHeight,
+      },
         tabBarStyle: {
           position: "absolute",
-          bottom: Math.max(insets.bottom, tabBar.horizontalInset),
+          bottom: tabBarBottom,
           height: tabBar.height,
           marginHorizontal: tabBar.horizontalInset,
           borderRadius: tabBar.radius,
