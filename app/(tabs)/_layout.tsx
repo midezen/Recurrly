@@ -26,9 +26,9 @@ const TabLayout = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-          sceneStyle: {
-         paddingBottom: tabBarTotalHeight,
-      },
+      //     sceneStyle: {
+      //    paddingBottom: tabBarTotalHeight,
+      // },
         tabBarStyle: {
           position: "absolute",
           bottom: tabBarBottom,
