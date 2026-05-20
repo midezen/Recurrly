@@ -1,7 +1,7 @@
 import { AuthButton } from "@/components/AuthButton";
 import { AuthInput } from "@/components/AuthInput";
-import { extractClerkErrors, sanitizeInput, validateEmail } from "@/lib/auth";
-import { useAuth, useSignIn } from "@clerk/expo";
+import { extractClerkErrors } from "@/lib/auth";
+import { useAuth, useSignUp } from "@clerk/expo";
 import { type Href, Link, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -13,23 +13,21 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const SignIn = () => {
+const VerifyEmail = () => {
   const router = useRouter();
   const { isSignedIn, isLoaded } = useAuth();
-  const { signIn } = useSignIn();
+  const { signUp } = useSignUp();
 
   // Form state
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [generalError, setGeneralError] = useState<string>("");
   const [errors, setErrors] = useState({
-    email: "",
-    password: "",
+    code: "",
   });
 
   // Refs for keyboard navigation
-  const passwordRef = useRef<any>(null);
+  const codeRef = useRef<any>(null);
 
   // Redirect if already signed in
   useEffect(() => {
@@ -38,47 +36,19 @@ const SignIn = () => {
     }
   }, [isSignedIn, isLoaded, router]);
 
-  // Email validation
-  const validateEmailField = (value: string) => {
-    const sanitized = sanitizeInput(value);
-    setEmail(sanitized);
-
-    if (!sanitized) {
-      setErrors((prev) => ({ ...prev, email: "" }));
-      return;
-    }
-
-    if (!validateEmail(sanitized)) {
-      setErrors((prev) => ({ ...prev, email: "Enter a valid email address" }));
-    } else {
-      setErrors((prev) => ({ ...prev, email: "" }));
-    }
-  };
-
-  // Password validation
-  const validatePasswordField = (value: string) => {
-    setPassword(value);
-    setErrors((prev) => ({ ...prev, password: "" }));
+  // Code validation
+  const validateCodeField = (value: string) => {
+    setCode(value);
+    setErrors((prev) => ({ ...prev, code: "" }));
   };
 
   // Form validation before submission
   const validateForm = (): boolean => {
-    const newErrors = { email: "", password: "" };
+    const newErrors = { code: "" };
     let isValid = true;
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      newErrors.email = "Enter a valid email address";
-      isValid = false;
-    }
-
-    if (!password) {
-      newErrors.password = "Password is required";
-      isValid = false;
-    } else if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+    if (!code.trim()) {
+      newErrors.code = "Please provide the code sent to your email";
       isValid = false;
     }
 
@@ -87,7 +57,7 @@ const SignIn = () => {
   };
 
   // Handle sign in
-  const handleSignIn = async () => {
+  const handleCodeVerification = async () => {
     setGeneralError("");
 
     if (!validateForm()) {
@@ -97,24 +67,18 @@ const SignIn = () => {
     setIsLoading(true);
 
     try {
-      const { error: clerkError } = await signIn.password({
-        emailAddress: email,
-        password,
+      const { error: clerkError } = await signUp.verifications.verifyEmailCode({
+        code,
       });
-
-      if (clerkError) {
-        setGeneralError(clerkError.message);
-      }
-
-      if (signIn.status === "complete") {
-        await signIn.finalize({
+      if (!clerkError && signUp.status === "complete") {
+        await signUp.finalize({
           navigate: ({ session, decorateUrl }) => {
             if (session?.currentTask) {
               console.log(session?.currentTask);
               return;
             }
 
-            const url = decorateUrl("/(tabs)");
+            const url = decorateUrl("/(auth)/sign-in");
             if (url.startsWith("http")) {
               window.location.href = url;
             } else {
@@ -122,6 +86,10 @@ const SignIn = () => {
             }
           },
         });
+      } else {
+        setGeneralError(JSON.stringify(clerkError, null, 2));
+        // Check why the sign-up is not complete
+        console.error("Sign-up attempt not complete:", signUp);
       }
     } catch (err) {
       const clerkErrors = extractClerkErrors(err);
@@ -129,10 +97,10 @@ const SignIn = () => {
         setGeneralError(clerkErrors[0]);
       } else {
         setGeneralError(
-          "Unable to sign in. Please check your credentials and try again.",
+          "Unable to Verify. Please check the code and try again.",
         );
       }
-      console.error("Sign in error:", err);
+      console.error("Code Verification Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -176,9 +144,9 @@ const SignIn = () => {
 
             {/* Content */}
             <View className="mt-8">
-              <Text className="auth-title">Welcome back</Text>
+              <Text className="auth-title">Verify Email</Text>
               <Text className="auth-subtitle">
-                Sign in to manage your subscriptions
+                Provide the code sent to your email
               </Text>
             </View>
 
@@ -196,42 +164,25 @@ const SignIn = () => {
               {/* Form Fields */}
               <View className="auth-form">
                 <AuthInput
-                  label="Email Address"
-                  placeholder="you@example.com"
-                  keyboardType="email-address"
+                  label="Verfication Code"
                   autoCapitalize="none"
                   autoCorrect={false}
-                  value={email}
-                  onChangeText={validateEmailField}
-                  error={errors.email}
+                  value={code}
+                  onChangeText={validateCodeField}
+                  error={errors.code}
                   editable={!isLoading}
                   returnKeyType="next"
-                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  onSubmitEditing={() => codeRef.current?.focus()}
                   blurOnSubmit={false}
-                />
-
-                <AuthInput
-                  ref={passwordRef}
-                  label="Password"
-                  placeholder="Enter your password"
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  value={password}
-                  onChangeText={validatePasswordField}
-                  error={errors.password}
-                  editable={!isLoading}
-                  returnKeyType="done"
-                  onSubmitEditing={handleSignIn}
                 />
               </View>
 
               {/* Sign In Button */}
               <AuthButton
-                text="Sign In"
-                onPress={handleSignIn}
+                text="Verify"
+                onPress={handleCodeVerification}
                 isLoading={isLoading}
-                isDisabled={!email || !password}
+                isDisabled={!code}
                 style={{ marginTop: 16 }}
               />
             </View>
@@ -239,19 +190,20 @@ const SignIn = () => {
             {/* Divider */}
             <View className="auth-divider-row">
               <View className="auth-divider-line" />
-              <Text className="auth-divider-text">New here?</Text>
+              <Text className="auth-divider-text">
+                Having issues receiving code?
+              </Text>
               <View className="auth-divider-line" />
             </View>
 
             {/* Sign Up Link */}
             <Link href="/(auth)/sign-up" asChild>
-              <AuthButton text="Create an account" variant="secondary" />
+              <AuthButton text="Resend code" variant="secondary" />
             </Link>
 
             {/* Footer Message */}
             <Text className="mt-6 text-center text-xs font-sans-medium text-muted-foreground">
-              By signing in, you agree to our Terms of Service and Privacy
-              Policy
+              By verifying, you agree to our Terms of Service and Privacy Policy
             </Text>
           </View>
         </ScrollView>
@@ -260,4 +212,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default VerifyEmail;

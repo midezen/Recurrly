@@ -1,4 +1,6 @@
 import "@/global.css";
+import { ClerkAuthProvider } from "@/lib/clerk-provider";
+import { useAuth } from "@clerk/expo";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
@@ -23,5 +25,40 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <ClerkAuthProvider>
+      <RootLayoutNav />
+    </ClerkAuthProvider>
+  );
+}
+
+// Auth-aware navigation wrapper
+function RootLayoutNav() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  useEffect(() => {
+    if (isLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoaded]);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {isSignedIn ? (
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+      ) : (
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            headerShown: false,
+          }}
+        />
+      )}
+    </Stack>
+  );
 }

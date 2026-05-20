@@ -271,7 +271,7 @@
   }
 
   .auth-subtitle {
-    @apply mt-2 max-w-[320px] text-center text-base font-sans-medium text-muted-foreground;
+    @apply mt-2 max-w-[320px] text-base font-sans-medium text-muted-foreground;
   }
 
   .auth-card {
