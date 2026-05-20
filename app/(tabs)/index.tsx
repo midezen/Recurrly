@@ -4,13 +4,13 @@ import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import {
   HOME_BALANCE,
   HOME_SUBSCRIPTIONS,
-  HOME_USER,
   UPCOMING_SUBSCRIPTIONS,
 } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
 import "@/global.css";
 import { formatCurrency } from "@/lib/utils";
+import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { FlatList, Image, Text, View } from "react-native";
@@ -20,6 +20,7 @@ export default function Index() {
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
+  const user = useUser().user;
   return (
     <SafeAreaView className="flex-1 p-5 bg-background">
       <FlatList
@@ -28,7 +29,7 @@ export default function Index() {
             <View className="home-header">
               <View className="home-user">
                 <Image source={images.avatar} className="home-avatar" />
-                <Text className="home-user-name">{HOME_USER.name}</Text>
+                <Text className="home-user-name">{user?.firstName}</Text>
               </View>
               <View className="p-3 border-[0.5px] border-[lightgrey] rounded-full shadow-sm">
                 <Image source={icons.add} className="home-add-icon" />
@@ -71,6 +72,7 @@ export default function Index() {
         renderItem={({ item }) => (
           <SubscriptionCard
             {...item}
+            currency={item.currency ?? "USD"}
             expanded={expandedSubscriptionId === item.id}
             onPress={() =>
               setExpandedSubscriptionId((currentId) =>
