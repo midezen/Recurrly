@@ -1,5 +1,6 @@
 import "@/global.css";
 import { ClerkAuthProvider } from "@/lib/clerk-provider";
+import { SubscriptionProvider } from "@/lib/SubscriptionContext";
 import { useAuth } from "@clerk/expo";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
@@ -27,7 +28,9 @@ export default function RootLayout() {
 
   return (
     <ClerkAuthProvider>
-      <RootLayoutNav />
+      <SubscriptionProvider>
+        <RootLayoutNav />
+      </SubscriptionProvider>
     </ClerkAuthProvider>
   );
 }
