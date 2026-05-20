@@ -114,30 +114,30 @@ const Settings = () => {
   }
 
   const settingsSections: SettingsSection[] = [
-    {
-      id: "profile",
-      title: "Edit Profile",
-      icon: "👤",
-      action: handleEditProfile,
-    },
-    {
-      id: "password",
-      title: "Change Password",
-      icon: "🔑",
-      action: handleChangePassword,
-    },
-    {
-      id: "notifications",
-      title: "Notifications",
-      icon: "🔔",
-      action: handleNotificationSettings,
-    },
-    {
-      id: "privacy",
-      title: "Privacy & Security",
-      icon: "🔒",
-      action: handlePrivacySettings,
-    },
+    // {
+    //   id: "profile",
+    //   title: "Edit Profile",
+    //   icon: "👤",
+    //   action: handleEditProfile,
+    // },
+    // {
+    //   id: "password",
+    //   title: "Change Password",
+    //   icon: "🔑",
+    //   action: handleChangePassword,
+    // },
+    // {
+    //   id: "notifications",
+    //   title: "Notifications",
+    //   icon: "🔔",
+    //   action: handleNotificationSettings,
+    // },
+    // {
+    //   id: "privacy",
+    //   title: "Privacy & Security",
+    //   icon: "🔒",
+    //   action: handlePrivacySettings,
+    // },
     {
       id: "logout",
       title: "Sign Out",
@@ -229,9 +229,9 @@ const Settings = () => {
 
         {/* Settings Options */}
         <View className="mb-8">
-          <Text className="text-sm font-semibold text-foreground mb-3 uppercase opacity-60">
+          {/* <Text className="text-sm font-semibold text-foreground mb-3 uppercase opacity-60">
             Account Settings
-          </Text>
+          </Text> */}
 
           {settingsSections.map((section, index) => (
             <TouchableOpacity
@@ -249,7 +249,7 @@ const Settings = () => {
                     section.destructive ? "text-destructive" : "text-foreground"
                   }`}
                 >
-                  {section.title}
+                  {section.title} 
                 </Text>
               </View>
 

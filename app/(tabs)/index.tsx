@@ -82,7 +82,7 @@ export default function Index() {
           </>
         )}
         style={{ flex: 1 }}
-        data={subscriptions}
+        data={subscriptions.slice(0, 4)}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <SubscriptionCard
